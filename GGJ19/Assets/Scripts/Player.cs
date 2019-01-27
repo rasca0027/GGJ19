@@ -19,6 +19,7 @@ public class Player
 		name = playerName;
 		occupation = "Game Dev";
 		nativeLanguage = "Mandarin";
+
 		technicalSkills = 0.5f;
 		stressHappyLevel = 0.5f;
 		languageAbility = 0.5f;
@@ -26,19 +27,5 @@ public class Player
 	}
 
 
-	public void ImproveTechnicalSkills()
-	{
-
-	}
-
-	public void TalkToFamily()
-	{
-
-	}
-
-	public void ExpandNetwork()
-	{
-
-	}
 
 }
