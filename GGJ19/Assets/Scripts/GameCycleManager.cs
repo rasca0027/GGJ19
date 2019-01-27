@@ -12,6 +12,7 @@ public class GameCycleManager : MonoBehaviour {
 	public Text remainingActions;
 	public Text weekText;
 	public GameObject infoText;
+	public GameObject title;
 
 
 	int weekNum; // 1 ~ 52
@@ -47,7 +48,7 @@ public class GameCycleManager : MonoBehaviour {
 		if (state == GameState.Weekday)
 		{
 
-			if (weekNum >= 53)
+			if (weekNum >= 11)
 			{
 				state = GameState.End;
 			}
@@ -61,9 +62,11 @@ public class GameCycleManager : MonoBehaviour {
 		{
 			if (player.technicalSkills >= 0.75f && player.stressHappyLevel >= 0.35f && player.languageAbility >= 0.45f)
 			{
-
-				visaStatus = true;
+				buttonClicked("It's time to apply for VISA. Your working skill and English skill is good enough to get the VISA. Congrats!");
 			} 
+			else
+				buttonClicked("Unfortunately, you didn't get the VISA. Try again (in your next life).");
+			ReturnToTitle();
 		}	
 
 		// change slider value
@@ -75,6 +78,12 @@ public class GameCycleManager : MonoBehaviour {
 		remainingActions.text = actions.ToString();
 		weekText.text = "week " + weekNum.ToString();
 
+	}
+
+	private void ReturnToTitle()
+	{
+		state = GameState.Weekday;
+		title.SetActive(true);
 	}
 
 	private void buttonClicked(string res)
@@ -89,7 +98,7 @@ public class GameCycleManager : MonoBehaviour {
 		infoText.transform.GetChild(0).GetComponent<Text>().text = res;
         yield return new WaitForSeconds(2);
 		infoText.SetActive(false);
-		if (actions == 0)
+		if (actions <= 0)
 		{
 			state = GameState.Weekend;
 			weekNum += 2;
