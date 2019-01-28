@@ -13,6 +13,16 @@ public class GameCycleManager : MonoBehaviour {
 	public Text weekText;
 	public GameObject infoText;
 	public GameObject title;
+	public GameObject news;
+	public GameObject room;
+
+	public Sprite normal;
+	public Sprite happy;
+	public Sprite sad;
+	public Sprite dying;
+	public Sprite dead;
+	public Image portrait;
+	public GameObject X;
 
 
 	int weekNum; // 1 ~ 52
@@ -21,6 +31,7 @@ public class GameCycleManager : MonoBehaviour {
 	Player player;
 	GameState state;
 	bool visaStatus;
+	int mood;
 
 	List<string> actionsThisRound;
 
@@ -28,7 +39,8 @@ public class GameCycleManager : MonoBehaviour {
 	{
 		Weekday,
 		Weekend,
-		End
+		End,
+		Ending
 	}
 
 	// Use this for initialization
@@ -45,10 +57,61 @@ public class GameCycleManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		switch(mood)
+		{
+			case 0:
+				portrait.sprite = normal;
+				break;
+			case 1:
+				portrait.sprite = happy;
+				break;
+			case 2:
+				portrait.sprite = sad;
+				break;
+			case 3:
+				portrait.sprite = dying;
+				break;
+			case 4:
+				portrait.sprite = dead;
+				break;
+		}
+		if (player.stressHappyLevel < 0.4)
+			mood = 2;
+		if (player.stressHappyLevel < 0.2)
+			mood = 3;
+		if (player.stressHappyLevel < 0.1)
+			mood = 4;
+
+
 		if (state == GameState.Weekday)
 		{
+			if (weekNum == 7) {
+				ShowNews("Alon Musk like billionaire decides to tackle immigration. Your chance of getting visa is lower now.");
+				weekNum += 2;
+				state = GameState.Weekend;
+				StartCoroutine(ShowInfo("Week " + weekNum.ToString()));
+			}
+			if (weekNum == 11) {
+				ShowNews("Your immigration lawyer dies of snorting sugar.");
+				weekNum += 2;
+				state = GameState.Weekend;
+				StartCoroutine(ShowInfo("Week " + weekNum.ToString()));
+			}
 
-			if (weekNum >= 11)
+			if (weekNum == 17) {
+				ShowNews("Ronald Drump decides golf skills be made a criteria for the GR-8 visa.");
+				weekNum += 2;
+				state = GameState.Weekend;
+				StartCoroutine(ShowInfo("Week " + weekNum.ToString()));
+			}
+
+			if (weekNum == 23) {
+				ShowNews("The immigration website gets hacked by FSociety.");
+				weekNum += 2;
+				state = GameState.Weekend;
+				StartCoroutine(ShowInfo("Week " + weekNum.ToString()));
+			}
+			if (weekNum >= 27)
 			{
 				state = GameState.End;
 			}
@@ -58,16 +121,18 @@ public class GameCycleManager : MonoBehaviour {
 			actions = maxActions;
 			state = GameState.Weekday;
 		}
-		else // End, evaluate visa
+		else if (state == GameState.End) // End, evaluate visa
 		{
 			if (player.technicalSkills >= 0.75f && player.stressHappyLevel >= 0.35f && player.languageAbility >= 0.45f)
 			{
-				buttonClicked("It's time to apply for VISA. Your working skill and English skill is good enough to get the VISA. Congrats!");
+				ShowNews("It's time to apply for VISA. Your working skill and English skill is good enough to get the VISA. Congrats!");
 			} 
 			else
-				buttonClicked("Unfortunately, you didn't get the VISA. Try again (in your next life).");
-			ReturnToTitle();
+				ShowNews("Unfortunately, you didn't get the VISA. Try again (in your next life).");
+			X.SetActive(false);
 		}	
+		
+
 
 		// change slider value
 		jobSlider.value = player.technicalSkills;
@@ -78,12 +143,50 @@ public class GameCycleManager : MonoBehaviour {
 		remainingActions.text = actions.ToString();
 		weekText.text = "week " + weekNum.ToString();
 
+		if (Input.GetKey("escape"))
+        {
+            ReturnToTitle();
+        }
+
+	
+
+	}
+
+	private void ShowNews(string newsText)
+	{
+		room.SetActive(false);
+		news.SetActive(true);
+
+		news.transform.GetChild(0).GetComponent<Text>().text = newsText;
+	}
+
+	public void CloseNews()
+	{
+		news.SetActive(false);
+		room.SetActive(true);
 	}
 
 	private void ReturnToTitle()
 	{
 		state = GameState.Weekday;
+		weekNum = 1;
 		title.SetActive(true);
+	}
+
+	public void StartGame()
+	{
+		title.SetActive(false);
+	}
+
+	public void EndGame()
+	{
+		#if UNITY_EDITOR
+        // Application.Quit() does not work in the editor so
+        // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
+        UnityEditor.EditorApplication.isPlaying = false;
+		#else
+			Application.Quit();
+		#endif
 	}
 
 	private void buttonClicked(string res)
@@ -96,7 +199,7 @@ public class GameCycleManager : MonoBehaviour {
     {
 		infoText.SetActive(true);
 		infoText.transform.GetChild(0).GetComponent<Text>().text = res;
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(3);
 		infoText.SetActive(false);
 		if (actions <= 0)
 		{
